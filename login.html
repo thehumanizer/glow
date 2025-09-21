@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - KHI Leadership</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Sarabun', sans-serif; } </style>
+</head>
+<body class="bg-gray-50 flex items-center justify-center h-screen">
+    <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
+        <div>
+            <h2 class="text-center text-3xl font-bold text-gray-900">
+                เข้าสู่ระบบ KHI Leadership
+            </h2>
+        </div>
+        <form id="login-form" class="mt-8 space-y-6">
+            <div class="rounded-md shadow-sm -space-y-px">
+                <div>
+                    <label for="email" class="sr-only">Email address</label>
+                    <input id="email" name="email" type="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-teal-500 focus:border-teal-500" placeholder="อีเมล">
+                </div>
+                <div>
+                    <label for="password" class="sr-only">Password</label>
+                    <input id="password" name="password" type="password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-teal-500 focus:border-teal-500" placeholder="รหัสผ่าน">
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    เข้าสู่ระบบ
+                </button>
+            </div>
+            <div id="error-message" class="text-center text-sm text-red-600"></div>
+        </form>
+        <div class="text-center">
+            <p class="text-sm">
+                ยังไม่มีบัญชี?
+                <a href="/signup.html" class="font-medium text-teal-600 hover:text-teal-500">
+                    สมัครสมาชิกที่นี่
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // 1. ตั้งค่าการเชื่อมต่อ Supabase
+        const SUPABASE_URL = 'https://qucwkirtvrgmthrqcfug.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1Y3draXJ0dnJnbXRocnFjZnVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxMjQ4MDEsImV4cCI6MjA2OTcwMDgwMX0.QxP39mpumwptmFgiyNOXJbe6cwWr3fsw_Wqisu8_gWE'; // ◀️◀️◀️ วาง Anon Key ของคุณที่นี่
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // 2. ดึง Element ที่จำเป็น
+        const loginForm = document.getElementById('login-form');
+        const errorMessage = document.getElementById('error-message');
+
+        // 3. สร้าง Event Listener สำหรับการกดปุ่ม Login
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // ป้องกันไม่ให้หน้าเว็บโหลดใหม่
+
+            const email = loginForm.email.value;
+            const password = loginForm.password.value;
+
+            // 4. เรียกใช้ฟังก์ชัน signInWithPassword ของ Supabase
+            const { data, error } = await _supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                // 5. ถ้ามี Error (เช่น รหัสผิด) ให้แสดงข้อความ
+                errorMessage.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+            } else {
+                // 6. ถ้าสำเร็จ ให้ส่งผู้ใช้ไปที่หน้า Dashboard
+                window.location.href = '/dashboard.html';
+            }
+        });
+
+        // (Bonus) ตรวจสอบว่าผู้ใช้ Login อยู่แล้วหรือไม่
+        async function checkUserSession() {
+            const { data, error } = await _supabase.auth.getSession();
+            if (data.session) {
+                // ถ้ามี session อยู่แล้ว (เคย Login ค้างไว้) ให้ส่งไปหน้า Dashboard เลย
+                window.location.href = '/dashboard.html';
+            }
+        }
+        
+        // เรียกใช้ฟังก์ชันนี้ทันทีที่หน้าเว็บโหลด
+        checkUserSession();
+    </script>
+</body>
+</html>
